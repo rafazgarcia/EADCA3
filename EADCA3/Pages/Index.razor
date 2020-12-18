@@ -1,0 +1,264 @@
+﻿@using System.IO;
+@using System.Web;
+@using System.Net.Http;
+@using System.Text.RegularExpressions;
+
+@page "/"
+@inject HttpClient Http
+    <!-- Load icon library -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+
+    body {
+        font-family: Arial;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    form.example input[type=text] {
+        padding: 10px;
+        font-size: 17px;
+        border: 1px solid grey;
+        float: left;
+        width: 80%;
+        background: #f1f1f1;
+    }
+
+    form.example button {
+        float: left;
+        width: 20%;
+        padding: 10px;
+        background: #2196F3;
+        color: white;
+        font-size: 17px;
+        border: 1px solid grey;
+        border-left: none;
+        cursor: pointer;
+    }
+
+        form.example button:hover {
+            background: #0b7dda;
+        }
+
+    form.example::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+
+    .card {
+        /* Add shadows to create the "card" effect */
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+        height: 30%;
+        width: 30%;
+    }
+
+        /* On mouse-over, add a deeper shadow */
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+
+    /* Add some padding inside the card container */
+    .container {
+        padding: 2px 16px;
+    }
+</style>
+
+
+<h1>Food Recipes</h1>
+
+    Enjoy some meal recipes below. Or use the search engine to find a specific meal!
+<br>
+<br>
+<div>
+    <label for="Recipe">Recipe : </label>
+    <input id="Recipe" @bind="this.meal" />
+    <button id="RecipeButton" @onclick="searchRecipe">Search</button>
+    @if(this.invalidInput == true)
+    {
+        <p>Invalid input</p>
+    }
+</div>
+<br>
+<br>
+
+
+@if (found == false)
+{
+    <div>
+        <p>Data not found</p>
+    </div>
+}
+
+@if (found == true)
+{
+    @for (int i = 0; i < data.meals.Count; i++)
+    {
+        <div class="card">
+            <img src="@data.meals.ElementAt(i).strMealThumb" alt="Avatar" style="width:100%">
+            <div class="container">
+                <h4><b>@data.meals.ElementAt(i).strMeal</b></h4>
+                <p>Tags : @data.meals.ElementAt(i).strTags</p>
+                <a href="@data.meals.ElementAt(i).strYoutube" target="_blank">Check full recipe on Youtube</a>
+            </div>
+        </div>
+        <br>
+        <br>
+    }
+}
+
+
+
+@code{
+    //Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+
+    private bool found;
+
+    private Root data;
+
+    private bool nullString;
+    private bool invalidInput;
+    private String meal;
+    private string errorMessage;
+
+    public String getMeal()
+    {
+        return this.meal;
+    }
+
+    public void setMeal(string m)
+    {
+        this.meal = m;
+    }
+
+    public bool getInvalidInput()
+    {
+        return this.invalidInput;
+    }
+
+    public async Task getFoodAsync()
+    {
+        try
+        {
+
+            string uri = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + this.meal;
+            data = await Http.GetFromJsonAsync<Root>(uri);
+            found = true;
+            errorMessage = String.Empty;
+        }
+        catch (Exception e)
+        {
+            found = false;
+            errorMessage = e.Message;
+        }
+    }
+
+    //for testing
+    public int totalRecipes(string meal)
+    {
+        this.meal = meal;
+
+        int total = data.meals.Count;
+
+        return total;
+    }
+
+    //Lifecycle method
+    protected override async Task OnInitializedAsync()
+    {
+        await getFoodAsync();
+    }
+
+    public async void searchRecipe()
+    {
+        Regex rx = new Regex(@"^[a-zA-Z0-9\s]+$");
+        if (this.meal != null)
+        {
+           this.nullString = false;
+           if (rx.IsMatch(this.meal) == false)
+            {
+                this.invalidInput = true;
+            }
+            else
+            {
+                await getFoodAsync();
+                StateHasChanged();
+                this.invalidInput = false;
+            }
+        }
+        else
+        {
+            this.nullString = true;
+        }
+
+    }
+
+
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class Meal
+    {
+
+        public string idMeal { get; set; }
+        public string strMeal { get; set; }
+        public object strDrinkAlternate { get; set; }
+        public string strCategory { get; set; }
+        public string strArea { get; set; }
+        public string strInstructions { get; set; }
+        public string strMealThumb { get; set; }
+        public string strTags { get; set; }
+        public string strYoutube { get; set; }
+        public string strIngredient1 { get; set; }
+        public string strIngredient2 { get; set; }
+        public string strIngredient3 { get; set; }
+        public string strIngredient4 { get; set; }
+        public string strIngredient5 { get; set; }
+        public string strIngredient6 { get; set; }
+        public string strIngredient7 { get; set; }
+        public string strIngredient8 { get; set; }
+        public string strIngredient9 { get; set; }
+        public string strIngredient10 { get; set; }
+        public string strIngredient11 { get; set; }
+        public string strIngredient12 { get; set; }
+        public string strIngredient13 { get; set; }
+        public string strIngredient14 { get; set; }
+        public string strIngredient15 { get; set; }
+        public object strIngredient16 { get; set; }
+        public object strIngredient17 { get; set; }
+        public object strIngredient18 { get; set; }
+        public object strIngredient19 { get; set; }
+        public object strIngredient20 { get; set; }
+        public string strMeasure1 { get; set; }
+        public string strMeasure2 { get; set; }
+        public string strMeasure3 { get; set; }
+        public string strMeasure4 { get; set; }
+        public string strMeasure5 { get; set; }
+        public string strMeasure6 { get; set; }
+        public string strMeasure7 { get; set; }
+        public string strMeasure8 { get; set; }
+        public string strMeasure9 { get; set; }
+        public string strMeasure10 { get; set; }
+        public string strMeasure11 { get; set; }
+        public string strMeasure12 { get; set; }
+        public string strMeasure13 { get; set; }
+        public string strMeasure14 { get; set; }
+        public string strMeasure15 { get; set; }
+        public object strMeasure16 { get; set; }
+        public object strMeasure17 { get; set; }
+        public object strMeasure18 { get; set; }
+        public object strMeasure19 { get; set; }
+        public object strMeasure20 { get; set; }
+        public object strSource { get; set; }
+        public object dateModified { get; set; }
+
+    }
+
+    public class Root
+    {
+        public List<Meal> meals { get; set; }
+    }
+
+}
